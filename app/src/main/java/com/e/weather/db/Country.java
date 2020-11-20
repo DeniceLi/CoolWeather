@@ -1,8 +1,8 @@
 package com.e.weather.db;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.crud.LitePalSupport;
 
-public class Country extends DataSupport {
+public class Country extends LitePalSupport {
     private int id;
     private String countyName;
     private String weatherId;   //记录县所对应的天气id
