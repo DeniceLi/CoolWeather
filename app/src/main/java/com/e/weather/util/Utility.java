@@ -1,9 +1,10 @@
 package com.e.weather.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.e.weather.db.City;
-import com.e.weather.db.Country;
+import com.e.weather.db.County;
 import com.e.weather.db.Province;
 
 import org.json.JSONArray;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 由于这里的JSON数据结构比较简单，所以不适用GSON来进行解析*/
 public class Utility {
 
+    private static final String TAG = "Utility";
 //    解析和处理服务器返回的省级数据
     public static boolean handleProvinceResponse(String response){
         if(!TextUtils.isEmpty(response)){
@@ -26,11 +28,13 @@ public class Utility {
                     province.setProvinceName(provinceObject.getString("name"));
                     province.setProvinceCode(provinceObject.getInt("id"));
                     province.save();
+                    Log.d(TAG,"Utility这是在干嘛1——1？");
                 }
                 return true;
             } catch (JSONException e) {
                 e.printStackTrace();
                 System.out.println("Utility返回省级数据失败");
+                Log.d(TAG,"Utility这是在干嘛1——2？");
             }
         }
         return false;
@@ -46,12 +50,15 @@ public class Utility {
                     City city = new City();
                     city.setCityName(cityObject.getString("name"));
                     city.setCityCode(cityObject.getInt("id"));
+                    city.setProvinceId(provinceId);
                     city.save();
+                    Log.d(TAG,"Utility这是在干嘛2——1？");
                 }
                 return true;
             } catch (JSONException e) {
                 e.printStackTrace();
                 System.out.println("Utility返回市级数据失败");
+                Log.d(TAG,"Utility这是在干嘛2——2？");
             }
         }
         return false;
@@ -64,7 +71,7 @@ public class Utility {
                 JSONArray allCounties = new JSONArray(response);
                 for (int i = 0; i < allCounties.length(); i++) {
                     JSONObject countyObject = allCounties.getJSONObject(i);
-                    Country county = new Country();
+                    County county = new County();
                     county.setCountyName(countyObject.getString("name"));
                     county.setWeatherId(countyObject.getString("weather_id"));
                     county.setCityId(cityId);

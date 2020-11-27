@@ -2,6 +2,7 @@ package com.e.weather.service;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,12 @@ import androidx.fragment.app.Fragment;
 
 import com.e.weather.R;
 import com.e.weather.db.City;
-import com.e.weather.db.Country;
+import com.e.weather.db.County;
 import com.e.weather.db.Province;
 import com.e.weather.util.HttpUtil;
 import com.e.weather.util.Utility;
 
-import org.litepal.crud.DataSupport;
+import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class ChooseAreaFragment extends Fragment {
+    //常量
+    private static final String TAG = "ChooseAreaFragment";
     public static final int LEVEL_PROVINCE = 0;
     public static final int LEVEL_CITY = 1;
     public static final int LEVEL_COUNTY = 2;
@@ -46,7 +49,7 @@ public class ChooseAreaFragment extends Fragment {
     private List<String> dataList = new ArrayList<>();
 
 //    省列表、市列表、县列表
-    private List<Province> provinceList;     private List<City> cityList;       private List<Country> countyList;
+    private List<Province> provinceList;     private List<City> cityList;       private List<County> countyList;
 
 //    选中的省份、城市和当前选中的级别
     private Province selectedProvince;      private City selectedCity;      private int currentLevel;
@@ -72,7 +75,8 @@ public class ChooseAreaFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> adapterView, View view,
+                                    int position, long id) {
                 if(currentLevel == LEVEL_PROVINCE){
                     selectedProvince = provinceList.get(position);
                     queryCities();
@@ -92,13 +96,15 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        Log.d(TAG,"启动程序便开始运行1");
         queryProvinces();
     }
-//    查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器查询
+
+    //    查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器查询
     private void queryProvinces(){
         titleText.setText("中国");
         backButton.setVisibility(View.GONE);
-        provinceList = DataSupport.findAll(Province.class);
+        provinceList = LitePal.findAll(Province.class);
 
         if (provinceList.size() > 0){
             dataList.clear();
@@ -112,19 +118,22 @@ public class ChooseAreaFragment extends Fragment {
             String address = "http://guolin.tech/api/china";
             queryFromServer(address,"province");
         }
+        Log.d(TAG,"启动程序便开始运行2?");
+
     }
 
     //    查询全国所有的市，优先从数据库查询，如果没有查询到再去服务器查询
     private void queryCities(){
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid = ?",
+        cityList = LitePal.where("provinceid = ?",
                 String.valueOf(selectedProvince.getId())).find(City.class);
 
         if (cityList.size() > 0){
             dataList.clear();
             for (City city: cityList){
                 dataList.add(city.getCityName());
+                Log.d(TAG,"这是在干嘛3_1?");
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
@@ -133,19 +142,22 @@ public class ChooseAreaFragment extends Fragment {
             int provinceCode = selectedProvince.getProvinceCode();
             String address = "http://guolin.tech/api/china/" + provinceCode;
             queryFromServer(address,"city");
+            Log.d(TAG,"这是在干嘛3_2?");
         }
+        Log.d(TAG,"这是在干嘛3?");
+
     }
 
-    //    查询全国所有的市，优先从数据库查询，如果没有查询到再去服务器查询
+    //    查询全国所有的县，优先从数据库查询，如果没有查询到再去服务器查询
     private void queryCounties(){
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList = DataSupport.where("cityid = ?",
-                String.valueOf(selectedCity.getId())).find(Country.class);
+        countyList = LitePal.where("cityid = ?",
+                String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0){
             dataList.clear();
-            for (Country country: countyList){
-                dataList.add(country.getCountyName());
+            for (County county: countyList){
+                dataList.add(county.getCountyName());
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
@@ -157,6 +169,8 @@ public class ChooseAreaFragment extends Fragment {
                     + provinceCode + "/" + cityCode;
             queryFromServer(address,"county");
         }
+        Log.d(TAG,"这是在干嘛4?");
+
     }
 
     //根据传入的地址和类型从服务器上查询省市县数据
