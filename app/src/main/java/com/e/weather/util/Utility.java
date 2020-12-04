@@ -6,6 +6,8 @@ import android.util.Log;
 import com.e.weather.db.City;
 import com.e.weather.db.County;
 import com.e.weather.db.Province;
+import com.e.weather.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,7 +66,7 @@ public class Utility {
         return false;
     }
 
-    //    解析和处理服务器返回的县级数据
+//    解析和处理服务器返回的县级数据
     public static boolean handleCountyResponse(String response,int cityId){
         if(!TextUtils.isEmpty(response)){
             try {
@@ -86,4 +88,19 @@ public class Utility {
         return false;
     }
 
+//    将返回的JSON数据解析成Weather实体类
+    public static Weather handleWeatherResponse(String response){
+        try{
+            Log.d(TAG,"Utility弄进去了吗?");
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+//           通过fromJson()方法直接将JSON数据转换成Weather对象
+            return new Gson().fromJson(weatherContent,Weather.class);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

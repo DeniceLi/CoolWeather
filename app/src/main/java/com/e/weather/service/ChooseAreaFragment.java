@@ -1,6 +1,7 @@
 package com.e.weather.service;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.e.weather.R;
+import com.e.weather.WeatherActivity;
 import com.e.weather.db.City;
 import com.e.weather.db.County;
 import com.e.weather.db.Province;
@@ -57,7 +59,8 @@ public class ChooseAreaFragment extends Fragment {
     @Nullable
     @Override
     //    获取控件实例，初始化ArrayAAdapter，将它设置为ListView的适配器
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.choose_area,container,false);
         titleText = view.findViewById(R.id.title_text);
@@ -83,6 +86,13 @@ public class ChooseAreaFragment extends Fragment {
                 }else if (currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }else if(currentLevel == LEVEL_COUNTY){
+//                    如果当前级别是LEVEL_COUNTY,就启动WeatherActivity，并把当前选中县的天气id传递过去
+                    String weatherId = countyList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -142,10 +152,7 @@ public class ChooseAreaFragment extends Fragment {
             int provinceCode = selectedProvince.getProvinceCode();
             String address = "http://guolin.tech/api/china/" + provinceCode;
             queryFromServer(address,"city");
-            Log.d(TAG,"这是在干嘛3_2?");
         }
-        Log.d(TAG,"这是在干嘛3?");
-
     }
 
     //    查询全国所有的县，优先从数据库查询，如果没有查询到再去服务器查询
@@ -158,6 +165,7 @@ public class ChooseAreaFragment extends Fragment {
             dataList.clear();
             for (County county: countyList){
                 dataList.add(county.getCountyName());
+                System.out.println(countyList);
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
