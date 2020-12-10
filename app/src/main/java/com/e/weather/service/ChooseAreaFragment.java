@@ -18,11 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.e.weather.MainActivity;
 import com.e.weather.R;
 import com.e.weather.WeatherActivity;
 import com.e.weather.db.City;
 import com.e.weather.db.County;
 import com.e.weather.db.Province;
+import com.e.weather.gson.Weather;
 import com.e.weather.util.HttpUtil;
 import com.e.weather.util.Utility;
 
@@ -89,10 +91,24 @@ public class ChooseAreaFragment extends Fragment {
                 }else if(currentLevel == LEVEL_COUNTY){
 //                    如果当前级别是LEVEL_COUNTY,就启动WeatherActivity，并把当前选中县的天气id传递过去
                     String weatherId = countyList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id",weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    /*instanceof关键字可以用来判断一个对象是否属于某个类的实例
+                    * 即判断该碎片是在MainActivity还是在WeatherActivity当中*/
+                    if(getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id",weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if(getActivity() instanceof WeatherActivity){
+                        /*在WeatherActivity中*/
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        /*关闭滑动菜单*/
+                        activity.drawerLayout.closeDrawers();
+                        /*显示下来刷新进度条*/
+                        activity.swipeRefresh.setRefreshing(true);
+                        /*请求新城市的天气信息*/
+                        activity.requestWeather(weatherId);
+                    }
+
                 }
             }
         });
