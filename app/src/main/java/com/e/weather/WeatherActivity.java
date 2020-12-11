@@ -5,6 +5,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.e.weather.gson.Forecast;
 import com.e.weather.gson.Weather;
+import com.e.weather.service.AutoUpdateService;
 import com.e.weather.util.HttpUtil;
 import com.e.weather.util.Utility;
 
@@ -35,8 +37,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
-
-    private static final String TAG = "WeatherActivity";
 
     private ScrollView weatherLayout;
     private TextView titleCity;
@@ -174,7 +174,10 @@ public class WeatherActivity extends AppCompatActivity {
                                             (WeatherActivity.this).edit();
                             editor.putString("weather",responseText);
                             editor.apply();
-//                            method
+                            showWeatherInfo(weather);
+
+                            Intent intent = new Intent(WeatherActivity.this, AutoUpdateService.class);
+                            startService(intent);
                         }else{
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",
                                     Toast.LENGTH_SHORT).show();
@@ -185,7 +188,7 @@ public class WeatherActivity extends AppCompatActivity {
             }
 
         });
-//        loadBingPic();
+        loadBingPic();
 }
 //        处理并展示Weather实体类中的数据
     /*从Weather对象中获取数据，然后显示到相应的空间上*/
@@ -200,9 +203,9 @@ public class WeatherActivity extends AppCompatActivity {
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
 
-//      for循环来处理每天的天气信息，在循环中动态加载forecast_item.xml布局并设置相应的数据，
-//            然后添加到父布局当中
-//                设置完所有数据之后，将ScrollView重新变成可见
+      /*for循环来处理每天的天气信息，在循环中动态加载forecast_item.xml布局并设置相应的数据，
+            然后添加到父布局当中
+               设置完所有数据之后，将ScrollView重新变成可见*/
         for (Forecast forecast : weather.forecastList) {
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item,
                     forecastLayout, false);

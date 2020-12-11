@@ -1,4 +1,4 @@
-package com.e.weather.service;
+package com.e.weather;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
